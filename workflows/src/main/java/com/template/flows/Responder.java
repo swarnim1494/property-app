@@ -1,7 +1,12 @@
 package com.template.flows;
 
 import co.paralleluniverse.fibers.Suspendable;
+import com.template.states.TemplateState;
+import net.corda.core.contracts.ContractState;
+import net.corda.core.crypto.SecureHash;
 import net.corda.core.flows.*;
+import net.corda.core.transactions.SignedTransaction;
+import org.jetbrains.annotations.NotNull;
 
 // ******************
 // * Responder flow *
@@ -29,7 +34,24 @@ public class Responder extends FlowLogic<Void> {
             counterpartySession.send(false);
         }
 
-        subFlow(new ReceiveFinalityFlow(counterpartySession));
+        class SignTxnFlow extends SignTransactionFlow{
+
+            public SignTxnFlow(@NotNull FlowSession otherSideSession) {
+                super(otherSideSession);
+            }
+
+            @Override
+            protected void checkTransaction(@NotNull SignedTransaction stx) throws FlowException {
+
+                ContractState output = stx.getTx().getOutputs().get(0).getData();
+                TemplateState out = (TemplateState) output;
+                String address = out.getAddress();
+
+
+            }
+        }
+        SecureHash expectedTxnID = subFlow(new SignTx)
+        subFlow(new ReceiveFinalityFlow(counterpartySession,expectedTxnID));
 
         return null;
     }

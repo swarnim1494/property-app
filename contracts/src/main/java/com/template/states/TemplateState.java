@@ -24,7 +24,6 @@ public class TemplateState implements ContractState {
 
 
 
-
     public TemplateState(int propertyID, String address, boolean surveyorApproved, Party owner, Party surveyor, Party buyer) {
         this.propertyID = propertyID;
         this.address = address;
