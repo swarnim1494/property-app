@@ -46,11 +46,13 @@ public class Responder extends FlowLogic<Void> {
                 ContractState output = stx.getTx().getOutputs().get(0).getData();
                 TemplateState out = (TemplateState) output;
                 String address = out.getAddress();
+                if (!address.contains("Blr"))
+                    throw new IllegalArgumentException("Not a valid address");
 
 
             }
         }
-        SecureHash expectedTxnID = subFlow(new SignTx)
+        SecureHash expectedTxnID = subFlow(new SignTxnFlow(counterpartySession)).getId();
         subFlow(new ReceiveFinalityFlow(counterpartySession,expectedTxnID));
 
         return null;
