@@ -58,3 +58,9 @@ public class Responder extends FlowLogic<Void> {
         return null;
     }
 }
+
+/*
+flow start Initiator propertyID: 1, address: "Happy Lane, Bellundur, Blr", surveyorApproved: false, owner: "GOI", surveyor: "Surveyor", buyer: null
+
+run vaultQuery contractStateType: com.template.states.TemplateState
+ */
