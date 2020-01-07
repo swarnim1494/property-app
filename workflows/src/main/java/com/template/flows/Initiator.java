@@ -53,7 +53,7 @@ public class Initiator extends FlowLogic<Void> {
         Boolean surveyorApproved = otherPartySession.receive(Boolean.class).unwrap(bl -> bl);
         Party notary = getServiceHub().getNetworkMapCache().getNotaryIdentities().get(0);
         TransactionBuilder txBuilder = new TransactionBuilder(notary);
-        List<PublicKey> requiredSigners = Arrays.asList(owner.getOwningKey(),surveyor.getOwningKey());
+        List<PublicKey> requiredSigners = Arrays.asList(getOurIdentity().getOwningKey(),surveyor.getOwningKey());
         Command command = new Command<>(new TemplateContract.Issue(), requiredSigners);
         txBuilder.addCommand(command);
         TemplateState outputState = new TemplateState(propertyID, address, surveyorApproved, owner, surveyor);
@@ -63,8 +63,10 @@ public class Initiator extends FlowLogic<Void> {
 
         SignedTransaction signedTx = getServiceHub().signInitialTransaction(txBuilder);
 
+        SignedTransaction fullySignedTx = subFlow(new CollectSignaturesFlow(
+                signedTx, Arrays.asList(otherPartySession), CollectSignaturesFlow.tracker()));
 
-        subFlow(new FinalityFlow(signedTx, otherPartySession));
+        subFlow(new FinalityFlow(fullySignedTx, otherPartySession));
         return null;
     }
 }
