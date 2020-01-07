@@ -4,7 +4,7 @@
     <option name="INCLUDE_PROVIDED_SCOPE" value="true" />
     <option name="MAIN_CLASS_NAME" value="com.template.NodeDriver" />
     <module name="property-app.workflows.test" />
-    <option name="VM_PARAMETERS" value="-ea &quot;-javaagent:lib/quasar.jar&quot;" />
+    <option name="VM_PARAMETERS" value="-ea -javaagent:lib/quasar.jar" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
