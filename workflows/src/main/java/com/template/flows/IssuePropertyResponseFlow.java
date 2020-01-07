@@ -1,23 +1,20 @@
 package com.template.flows;
 
 import co.paralleluniverse.fibers.Suspendable;
-import com.template.states.TemplateState;
-import net.corda.core.contracts.ContractState;
 import net.corda.core.crypto.SecureHash;
 import net.corda.core.flows.*;
 import net.corda.core.transactions.SignedTransaction;
-import org.jetbrains.annotations.NotNull;
 
 import static net.corda.core.contracts.ContractsDSL.requireThat;
 
 // ******************
 // * Responder flow *
 // ******************
-@InitiatedBy(Initiator.class)
-public class Responder extends FlowLogic<Void> {
+@InitiatedBy(IssuePropertyFlow.class)
+public class IssuePropertyResponseFlow extends FlowLogic<Void> {
     private FlowSession counterpartySession;
 
-    public Responder(FlowSession counterpartySession) {
+    public IssuePropertyResponseFlow(FlowSession counterpartySession) {
         this.counterpartySession = counterpartySession;
     }
 

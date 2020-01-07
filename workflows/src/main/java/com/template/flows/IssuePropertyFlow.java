@@ -20,7 +20,7 @@ import java.util.List;
 // ******************
 @InitiatingFlow
 @StartableByRPC
-public class Initiator extends FlowLogic<Void> {
+public class IssuePropertyFlow extends FlowLogic<Void> {
     private final ProgressTracker progressTracker = new ProgressTracker();
 
 
@@ -30,7 +30,7 @@ public class Initiator extends FlowLogic<Void> {
     private final Party surveyor;
 
 
-    public Initiator(int propertyID, String address, Party owner, Party surveyor) {
+    public IssuePropertyFlow(int propertyID, String address, Party owner, Party surveyor) {
         this.propertyID = propertyID;
         this.address = address;
         this.owner = owner;
@@ -45,28 +45,46 @@ public class Initiator extends FlowLogic<Void> {
     @Suspendable
     @Override
     public Void call() throws FlowException {
-        // Initiator flow logic goes here.
-
-
+        // Starting FlowSession with Surveyor
         FlowSession otherPartySession = initiateFlow(surveyor);
         otherPartySession.send(address);
+        //Checking if surveyor approved the property
         Boolean surveyorApproved = otherPartySession.receive(Boolean.class).unwrap(bl -> bl);
-        Party notary = getServiceHub().getNetworkMapCache().getNotaryIdentities().get(0);
-        TransactionBuilder txBuilder = new TransactionBuilder(notary);
-        List<PublicKey> requiredSigners = Arrays.asList(getOurIdentity().getOwningKey(),surveyor.getOwningKey());
-        Command command = new Command<>(new TemplateContract.Issue(), requiredSigners);
-        txBuilder.addCommand(command);
-        TemplateState outputState = new TemplateState(propertyID, address, surveyorApproved, owner, surveyor);
-        txBuilder.addOutputState(outputState,TemplateContract.ID);
 
+        //Getting notary
+        Party notary = getServiceHub().getNetworkMapCache().getNotaryIdentities().get(0);
+
+        //Building Output State
+        TemplateState outputState = new TemplateState(propertyID, address, surveyorApproved, owner, surveyor);
+
+        //Getting signers and command
+        List<PublicKey> requiredSigners = Arrays.asList(getOurIdentity().getOwningKey(), surveyor.getOwningKey());
+        Command command = new Command<>(new TemplateContract.Issue(), requiredSigners);
+
+        //Building Transactions
+        TransactionBuilder txBuilder = new TransactionBuilder(notary);
+        txBuilder.addCommand(command);
+        txBuilder.addOutputState(outputState, TemplateContract.ID);
+
+        //Verifying transaction
         txBuilder.verify(getServiceHub());
 
+        //Signing Transactions
         SignedTransaction signedTx = getServiceHub().signInitialTransaction(txBuilder);
 
+        //Gathering Counterparty Signatures
         SignedTransaction fullySignedTx = subFlow(new CollectSignaturesFlow(
                 signedTx, Arrays.asList(otherPartySession), CollectSignaturesFlow.tracker()));
 
+        //Committing the transaction to ledger
         subFlow(new FinalityFlow(fullySignedTx, otherPartySession));
         return null;
     }
+
+    Boolean surveyorApproval(FlowSession otherPartySession, String address) throws FlowException {
+        otherPartySession.send(address);
+        return otherPartySession.receive(Boolean.class).unwrap(bl -> bl);
+    }
+
+
 }

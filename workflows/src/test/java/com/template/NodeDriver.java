@@ -17,7 +17,10 @@ import static net.corda.testing.driver.Driver.driver;
 public class NodeDriver {
     public static void main(String[] args) {
         final List<User> rpcUsers =
-                ImmutableList.of(new User("user1", "test", ImmutableSet.of("ALL")));
+                ImmutableList.of(
+                        new User("user1", "test", ImmutableSet.of("ALL")
+                        )
+                );
 
         driver(new DriverParameters().withStartNodesInProcess(true).withWaitForAllNodesToFinish(true), dsl -> {
                     try {
