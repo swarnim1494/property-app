@@ -34,18 +34,12 @@ public class TemplateContract implements Contract {
 
             boolean surveyorApproved = outputState.isSurveyorApproved();
 
-            if (!owner.getName().equals("GOI"))
-                throw new IllegalArgumentException("Property cannot be issued to anyone other than GOI");
+ /*           if (!owner.getName().equals("GOI"))
+                throw new IllegalArgumentException("Property cannot be issued to anyone other than GOI");*/
             if (!surveyorApproved == true)
                 throw new IllegalArgumentException("Must be approved by surveyor");
         }
 
-    }
-
-    // Used to indicate the transaction's intent.
-    public interface Commands extends CommandData {
-        class Action implements Commands {
-        }
     }
 
     public static class Issue implements CommandData {

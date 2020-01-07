@@ -23,37 +23,18 @@ public class Responder extends FlowLogic<Void> {
     @Override
     public Void call() throws FlowException {
         // Responder flow logic goes here.
-        String address = counterpartySession.receive(String.class).unwrap(st->{
+        String address = counterpartySession.receive(String.class).unwrap(st -> {
 
             return st;
         });
 
-        if(address.contains("Blr")){
+        if (address.contains("Blr")) {
             counterpartySession.send(true);
-        }else{
+        } else {
             counterpartySession.send(false);
         }
 
-        class SignTxnFlow extends SignTransactionFlow{
-
-            public SignTxnFlow(@NotNull FlowSession otherSideSession) {
-                super(otherSideSession);
-            }
-
-            @Override
-            protected void checkTransaction(@NotNull SignedTransaction stx) throws FlowException {
-
-                ContractState output = stx.getTx().getOutputs().get(0).getData();
-                TemplateState out = (TemplateState) output;
-                String address = out.getAddress();
-                if (!address.contains("Blr"))
-                    throw new IllegalArgumentException("Not a valid address");
-
-
-            }
-        }
-        SecureHash expectedTxnID = subFlow(new SignTxnFlow(counterpartySession)).getId();
-        subFlow(new ReceiveFinalityFlow(counterpartySession,expectedTxnID));
+        subFlow(new ReceiveFinalityFlow(counterpartySession));
 
         return null;
     }

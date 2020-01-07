@@ -20,18 +20,7 @@ public class TemplateState implements ContractState {
     private final boolean surveyorApproved;
     private final Party owner;
     private final Party surveyor;
-    private Party buyer;
 
-
-
-    public TemplateState(int propertyID, String address, boolean surveyorApproved, Party owner, Party surveyor, Party buyer) {
-        this.propertyID = propertyID;
-        this.address = address;
-        this.surveyorApproved = surveyorApproved;
-        this.owner = owner;
-        this.surveyor = surveyor;
-        this.buyer = buyer;
-    }
 
     public TemplateState(int propertyID, String address, boolean surveyorApproved, Party owner, Party surveyor) {
         this.propertyID = propertyID;
@@ -54,10 +43,6 @@ public class TemplateState implements ContractState {
         return surveyorApproved;
     }
 
-    public Party getBuyer() {
-        return buyer;
-    }
-
     public Party getOwner() {
         return owner;
     }
@@ -68,6 +53,6 @@ public class TemplateState implements ContractState {
 
     @Override
     public List<AbstractParty> getParticipants() {
-        return ImmutableList.of(owner,surveyor);
+        return ImmutableList.of(owner, surveyor);
     }
 }
