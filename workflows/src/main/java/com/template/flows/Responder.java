@@ -28,6 +28,7 @@ public class Responder extends FlowLogic<Void> {
         String address = counterpartySession.receive(String.class).unwrap(st -> {
 
             return st;
+
         });
 
         if (address.contains("Blr")) {
@@ -44,7 +45,6 @@ public class Responder extends FlowLogic<Void> {
             @Override
             protected void checkTransaction(SignedTransaction stx) {
                 requireThat(require -> {
-
                     return null;
                 });
             }
