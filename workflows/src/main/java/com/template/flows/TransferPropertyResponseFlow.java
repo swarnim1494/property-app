@@ -10,11 +10,11 @@ import static net.corda.core.contracts.ContractsDSL.requireThat;
 // ******************
 // * Responder flow *
 // ******************
-@InitiatedBy(IssuePropertyFlow.class)
-public class IssuePropertyResponseFlow extends FlowLogic<Void> {
+@InitiatedBy(TransferPropertyFlow.class)
+public class TransferPropertyResponseFlow extends FlowLogic<Void> {
     private FlowSession counterpartySession;
 
-    public IssuePropertyResponseFlow(FlowSession counterpartySession) {
+    public TransferPropertyResponseFlow(FlowSession counterpartySession) {
         this.counterpartySession = counterpartySession;
     }
 
@@ -22,17 +22,6 @@ public class IssuePropertyResponseFlow extends FlowLogic<Void> {
     @Override
     public Void call() throws FlowException {
         // Responder flow logic goes here.
-        String address = counterpartySession.receive(String.class).unwrap(st -> {
-
-            return st;
-
-        });
-
-        if (address.contains("Blr")) {
-            counterpartySession.send(true);
-        } else {
-            counterpartySession.send(false);
-        }
 
         class SignTxFlow extends SignTransactionFlow {
             private SignTxFlow(FlowSession otherPartySession) {

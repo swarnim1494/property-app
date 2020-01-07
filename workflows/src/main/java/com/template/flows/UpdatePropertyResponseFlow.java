@@ -10,11 +10,11 @@ import static net.corda.core.contracts.ContractsDSL.requireThat;
 // ******************
 // * Responder flow *
 // ******************
-@InitiatedBy(IssuePropertyFlow.class)
-public class IssuePropertyResponseFlow extends FlowLogic<Void> {
+@InitiatedBy(UpdatePropertyFlow.class)
+public class UpdatePropertyResponseFlow extends FlowLogic<Void> {
     private FlowSession counterpartySession;
 
-    public IssuePropertyResponseFlow(FlowSession counterpartySession) {
+    public UpdatePropertyResponseFlow(FlowSession counterpartySession) {
         this.counterpartySession = counterpartySession;
     }
 

@@ -113,7 +113,7 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
         }
     }
     node {
-        name "O=LandDept,L=Bangalore,C=IN"
+        name "O=Buyer,L=Bangalore,C=IN"
         p2pPort 10005
         rpcSettings {
             address("localhost:10006")
@@ -132,7 +132,7 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
     }
 
     node{
-        name"O=Surveyor,L=Bangalore,C=IN"
+        name "O=Surveyor,L=Bangalore,C=IN"
         p2pPort 10010
         rpcSettings{
             address("localhost:10011")
@@ -143,10 +143,11 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
 
 }
 
+apply plugin: 'net.corda.plugins.quasar-utils'
+
 task installQuasar(type: Copy) {
     destinationDir rootProject.file("lib")
     from(configurations.quasar) {
         rename 'quasar-core(.*).jar', 'quasar.jar'
     }
 }
-

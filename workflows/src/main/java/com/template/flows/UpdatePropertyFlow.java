@@ -4,37 +4,41 @@ import co.paralleluniverse.fibers.Suspendable;
 import com.template.contracts.TemplateContract;
 import com.template.states.TemplateState;
 import net.corda.core.contracts.Command;
+import net.corda.core.contracts.StateAndRef;
 import net.corda.core.flows.*;
-import net.corda.core.identity.CordaX500Name;
 import net.corda.core.identity.Party;
+import net.corda.core.node.services.vault.IQueryCriteriaParser;
+import net.corda.core.node.services.vault.QueryCriteria;
 import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.transactions.TransactionBuilder;
 import net.corda.core.utilities.ProgressTracker;
+import org.jetbrains.annotations.NotNull;
 
+import javax.persistence.criteria.Predicate;
 import java.security.PublicKey;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+
+
 
 // ******************
 // * Initiator flow *
 // ******************
 @InitiatingFlow
 @StartableByRPC
-public class IssuePropertyFlow extends FlowLogic<Void> {
+public class UpdatePropertyFlow extends FlowLogic<Void> {
     private final ProgressTracker progressTracker = new ProgressTracker();
 
 
     private final int propertyID;
     private final String address;
-    private final Party owner;
-    private final Party surveyor;
 
 
-    public IssuePropertyFlow(int propertyID, String address, Party owner, Party surveyor) {
+
+    public UpdatePropertyFlow(int propertyID, String address) {
         this.propertyID = propertyID;
         this.address = address;
-        this.owner = owner;
-        this.surveyor = surveyor;
     }
 
     @Override
@@ -45,27 +49,35 @@ public class IssuePropertyFlow extends FlowLogic<Void> {
     @Suspendable
     @Override
     public Void call() throws FlowException {
+
+
+        //Getting notary
+        Party notary = getServiceHub().getNetworkMapCache().getNotaryIdentities().get(0);
+
+        //InputState
+        StateAndRef<TemplateState> inputState = getServiceHub().getVaultService().queryBy(TemplateState.class).getStates().get(0);
+        Party owner = inputState.getState().getData().getOwner();
+        Party surveyor =inputState.getState().getData().getSurveyor();
         // Starting FlowSession with Surveyor
         FlowSession otherPartySession = initiateFlow(surveyor);
         otherPartySession.send(address);
         //Checking if surveyor approved the property
         Boolean surveyorApproved = otherPartySession.receive(Boolean.class).unwrap(bl -> bl);
 
-        //Getting notary
-        Party notary = getServiceHub().getNetworkMapCache().getNotaryIdentities().get(0);
-
-
         //Building Output State
         TemplateState outputState = new TemplateState(propertyID, address, surveyorApproved, owner, surveyor);
 
+
+
         //Getting signers and command
         List<PublicKey> requiredSigners = Arrays.asList(getOurIdentity().getOwningKey(), surveyor.getOwningKey());
-        Command command = new Command<>(new TemplateContract.Commands.Issue(), requiredSigners);
+        Command command = new Command<>(new TemplateContract.Commands.Update(), requiredSigners);
 
         //Building Transactions
         TransactionBuilder txBuilder = new TransactionBuilder(notary);
         txBuilder.addCommand(command);
         txBuilder.addOutputState(outputState, TemplateContract.ID);
+        txBuilder.addInputState(inputState);
 
         //Verifying transaction
         txBuilder.verify(getServiceHub());

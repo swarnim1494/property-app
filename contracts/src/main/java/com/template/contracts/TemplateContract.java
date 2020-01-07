@@ -7,6 +7,7 @@ import net.corda.core.contracts.Contract;
 import net.corda.core.identity.Party;
 import net.corda.core.transactions.LedgerTransaction;
 
+
 import static net.corda.core.contracts.ContractsDSL.requireSingleCommand;
 
 // ************
@@ -20,9 +21,9 @@ public class TemplateContract implements Contract {
     // does not throw an exception.
     @Override
     public void verify(LedgerTransaction tx) {
-        final CommandWithParties<TemplateContract.Issue> command = requireSingleCommand(tx.getCommands(), TemplateContract.Issue.class);
+        final CommandWithParties<Commands> command = requireSingleCommand(tx.getCommands(), Commands.class);
 
-        if (command.getValue() instanceof Issue) {
+        if (command.getValue() instanceof Commands.Issue) {
             if (!tx.getInputs().isEmpty())
                 throw new IllegalArgumentException("No inputs should be consumed when creating a new property.");
             if (!(tx.getOutputs().size() == 1))
@@ -40,12 +41,39 @@ public class TemplateContract implements Contract {
                 throw new IllegalArgumentException("Must be approved by surveyor");
         }
 
+
+        if (command.getValue() instanceof Commands.Update) {
+            //TODO Purchase Contract Logic
+        }
+
+        if (command.getValue() instanceof Commands.Transfer) {
+            //TODO Purchase Contract Logic
+        }
+
     }
 
-    public static class Issue implements CommandData {
-    }
 
-    public static class Purchase implements CommandData {
-    }
+    public static class Commands implements CommandData {
 
+        public static class Issue extends Commands {
+            @Override
+            public boolean equals(Object obj) {
+                return obj instanceof Issue;
+            }
+        }
+
+        public static class Update extends Commands {
+            @Override
+            public boolean equals(Object obj) {
+                return obj instanceof Issue;
+            }
+        }
+
+        public static class Transfer extends Commands {
+            @Override
+            public boolean equals(Object obj) {
+                return obj instanceof Transfer;
+            }
+        }
+    }
 }
