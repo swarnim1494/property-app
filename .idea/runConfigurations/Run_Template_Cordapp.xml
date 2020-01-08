@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Run Template Cordapp" type="Application" factoryName="Application" singleton="false">
     <option name="ALTERNATIVE_JRE_PATH" value="11" />
-    <option name="MAIN_CLASS_NAME" value="com.template.NodeDriver" />
+    <option name="MAIN_CLASS_NAME" value="com.property.NodeDriver" />
     <module name="property-app.workflows.test" />
     <option name="VM_PARAMETERS" value="-ea -javaagent:lib/quasar.jar" />
     <method v="2">
