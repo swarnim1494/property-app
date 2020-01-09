@@ -2,7 +2,9 @@ package com.property.flows;
 
 import co.paralleluniverse.fibers.Suspendable;
 import com.property.contracts.PropertyContract;
+import com.property.contracts.PropertySurveyorContract;
 import com.property.states.PropertyState;
+import com.property.states.PropertySurveyorState;
 import net.corda.core.contracts.Command;
 import net.corda.core.contracts.UniqueIdentifier;
 import net.corda.core.flows.*;
@@ -32,7 +34,7 @@ public class IssuePropertyFlow extends FlowLogic<Void> {
 
 
 
-    public IssuePropertyFlow(String address, Party owner) {
+    public IssuePropertyFlow(String address) {
 
         this.address = address;
 
@@ -46,33 +48,41 @@ public class IssuePropertyFlow extends FlowLogic<Void> {
     @Suspendable
     @Override
     public Void call() throws FlowException {
-        // Starting FlowSession with Surveyor
-        CordaX500Name surveyorName = new CordaX500Name("Surveyor","Bangalore","IN");
-        Party surveyor = getServiceHub().getNetworkMapCache().getPeerByLegalName(surveyorName);
-        FlowSession otherPartySession = initiateFlow(surveyor);
-        otherPartySession.send(address);
-        //Checking if surveyor approved the property
-        Boolean surveyorApproved = otherPartySession.receive(Boolean.class).unwrap(bl -> bl);
+        // Starting FlowSession with Issuing Authority
 
-        //Getting notary
+        //GETTING NOTARY
         Party notary = getServiceHub().getNetworkMapCache().getNotaryIdentities().get(0);
 
+        //GETTING DATA FOR OUTPUT STATE: PropertySurveyorState
+
+        //linearID
         UniqueIdentifier linearId = new UniqueIdentifier(null, UUID.randomUUID());
 
-        Party owner = getOurIdentity();
+        //surveyorApproved
+        Boolean surveyorApproved = false;
+        //Boolean surveyorApproved = otherPartySession.receive(Boolean.class).unwrap(bl -> bl);
+        //otherPartySession.send(address);
+
+        //issuing authority
         Party issuingAuthority = getOurIdentity();
 
+        //surveyor
+        CordaX500Name surveyorName = new CordaX500Name("Surveyor","Bangalore","IN");
+        Party surveyor = getServiceHub().getNetworkMapCache().getPeerByLegalName(surveyorName);
+
+
         //Building Output State
-        PropertyState outputState = new PropertyState(linearId, address, surveyorApproved, owner, issuingAuthority, surveyor);
+        PropertySurveyorState outputState = new PropertySurveyorState(linearId, address, surveyorApproved, issuingAuthority, surveyor);
 
         //Getting signers and command
         List<PublicKey> requiredSigners = Arrays.asList(getOurIdentity().getOwningKey(), surveyor.getOwningKey());
-        Command command = new Command<>(new PropertyContract.Commands.Issue(), requiredSigners);
+        Command command = new Command<>(new PropertySurveyorContract.Commands.Issue(), requiredSigners);
+
 
         //Building Transactions
         TransactionBuilder txBuilder = new TransactionBuilder(notary);
         txBuilder.addCommand(command);
-        txBuilder.addOutputState(outputState,PropertyContract.ID);
+        txBuilder.addOutputState(outputState,PropertySurveyorContract.ID);
 
         //Verifying transaction
         txBuilder.verify(getServiceHub());
@@ -80,6 +90,8 @@ public class IssuePropertyFlow extends FlowLogic<Void> {
         //Signing Transactions
         SignedTransaction signedTx = getServiceHub().signInitialTransaction(txBuilder);
 
+        //Starting session at Surveyor's end
+        FlowSession otherPartySession = initiateFlow(surveyor);
 
         //Gathering Counterparty Signatures
         SignedTransaction fullySignedTx = subFlow(new CollectSignaturesFlow(

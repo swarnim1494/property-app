@@ -7,15 +7,14 @@ import net.corda.core.contracts.Contract;
 import net.corda.core.identity.Party;
 import net.corda.core.transactions.LedgerTransaction;
 
-
 import static net.corda.core.contracts.ContractsDSL.requireSingleCommand;
 
 // ************
 // * Contract *
 // ************
-public class PropertyContract implements Contract {
+public class PropertySurveyorContract implements Contract {
     // This is used to identify our contract when building a transaction.
-    public static final String ID = "com.property.contracts.PropertyContract";
+    public static final String ID = "com.property.contracts.PropertySurveyorContract";
 
     // A transaction is valid if the verify() function of the contract of all the transaction's input and output states
     // does not throw an exception.
@@ -24,29 +23,16 @@ public class PropertyContract implements Contract {
         final CommandWithParties<Commands> command = requireSingleCommand(tx.getCommands(), Commands.class);
 
         if (command.getValue() instanceof Commands.Issue) {
-/*            if (!tx.getInputs().isEmpty())
+            if (!tx.getInputs().isEmpty())
                 throw new IllegalArgumentException("No inputs should be consumed when creating a new property.");
             if (!(tx.getOutputs().size() == 1))
                 throw new IllegalArgumentException("There should be one output state.");
 
-            final PropertyState outputState = tx.outputsOfType(PropertyState.class).get(0);
-            Party owner = outputState.getOwner();
-            Party surveyor = outputState.getSurveyor();
-
-            boolean surveyorApproved = outputState.isSurveyorApproved();
-
-          if (!owner.getName().equals("GOI"))
-                throw new IllegalArgumentException("Property cannot be issued to anyone other than GOI");*//*
-            if (!surveyorApproved == true)
-                throw new IllegalArgumentException("Must be approved by surveyor");*/
         }
 
 
-        if (command.getValue() instanceof Commands.Update) {
-            //TODO Purchase Contract Logic
-        }
 
-        if (command.getValue() instanceof Commands.Transfer) {
+        if (command.getValue() instanceof Commands.SurveyApproval) {
             //TODO Purchase Contract Logic
         }
 
@@ -62,7 +48,7 @@ public class PropertyContract implements Contract {
             }
         }
 
-        public static class Update extends Commands {
+        public static class SurveyApproval extends Commands {
             @Override
             public boolean equals(Object obj) {
                 return obj instanceof Issue;
