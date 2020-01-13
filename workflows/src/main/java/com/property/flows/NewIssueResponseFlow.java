@@ -20,6 +20,7 @@ public class NewIssueResponseFlow extends FlowLogic<Void> {
 
     private final ProgressTracker progressTracker = new ProgressTracker(NEW_ISSUE_RESPONDER_START,NEW_ISSUE_RESPONDER_PRE_SUBFLOW,NEW_ISSUE_RESPONDER_CROSSED_SUBFLOW);
 
+    
     @Override
     public ProgressTracker getProgressTracker() {
         return progressTracker;
