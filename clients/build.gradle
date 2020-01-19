@@ -1,5 +1,6 @@
 apply plugin: 'org.springframework.boot'
 
+
 sourceSets {
     main {
         resources {
@@ -16,9 +17,13 @@ dependencies {
     compile project(":contracts")
     compile project(":workflows")
 
+
     compile("org.springframework.boot:spring-boot-starter-websocket:$spring_boot_version") {
         exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
     }
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.0.1'
+
+    implementation 'com.google.code.gson:gson:2.8.6'
 
     compile "org.apache.logging.log4j:log4j-slf4j-impl:${log4j_version}"
     compile "org.apache.logging.log4j:log4j-web:${log4j_version}"
@@ -26,17 +31,29 @@ dependencies {
 }
 
 springBoot {
-    mainClassName = "com.template.webserver.Server"
+    mainClassName = "com.property.webserver.Starter"
 }
 
 task runTemplateClient(type: JavaExec, dependsOn: assemble) {
     classpath = sourceSets.main.runtimeClasspath
-    main = 'com.template.Client'
+    main = 'com.property.Client'
     args 'localhost:10006', 'user1', 'test'
 }
 
-task runTemplateServer(type: JavaExec, dependsOn: assemble) {
+task runBuyerServer(type: JavaExec, dependsOn: assemble) {
     classpath = sourceSets.main.runtimeClasspath
-    main = 'com.template.webserver.Starter'
+    main = 'com.property.webserver.Starter'
     args '--server.port=10050', '--config.rpc.host=localhost', '--config.rpc.port=10006', '--config.rpc.username=user1', '--config.rpc.password=test'
+}
+
+task runGOIServer(type: JavaExec, dependsOn: assemble) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'com.property.webserver.Starter'
+    args '--server.port=10051', '--config.rpc.host=localhost', '--config.rpc.port=10009', '--config.rpc.username=user1', '--config.rpc.password=test'
+}
+
+task runSurveyorServer(type: JavaExec, dependsOn: assemble) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'com.property.webserver.Starter'
+    args '--server.port=10052', '--config.rpc.host=localhost', '--config.rpc.port=10011', '--config.rpc.username=user1', '--config.rpc.password=test'
 }

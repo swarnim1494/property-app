@@ -39,6 +39,12 @@ public class PropertyContract implements Contract {
                 throw new IllegalArgumentException("Property cannot be issued to anyone other than GOI");*//*
             if (!surveyorApproved == true)
                 throw new IllegalArgumentException("Must be approved by surveyor");*/
+            final PropertyState outputState = tx.outputsOfType(PropertyState.class).get(0);
+            boolean surveyorApproved = outputState.isSurveyorApproved();
+            if (!surveyorApproved == true)
+                throw new IllegalArgumentException("Must be approved by surveyor");
+
+
         }
 
 

@@ -54,21 +54,18 @@ public class UpdatePropertyFlow extends FlowLogic<Void> {
         //InputState
         //StateAndRef<PropertyState> inputState = getServiceHub().getVaultService().queryBy(PropertyState.class).getStates().get(0);
 
-
         QueryCriteria queryCriteria = new QueryCriteria.LinearStateQueryCriteria(null,Arrays.asList(linearId.getId()));
 
         StateAndRef<PropertyState> inputState = getServiceHub().getVaultService().queryBy(PropertyState.class,queryCriteria).getStates().get(0);
 
-
-
         Party owner = inputState.getState().getData().getOwner();
         Party surveyor =inputState.getState().getData().getSurveyor();
         Party issuingAuthority = inputState.getState().getData().getIssuingAuthority();
-        // Starting FlowSession with Surveyor
-        FlowSession otherPartySession = initiateFlow(surveyor);
-        otherPartySession.send(address);
+        // Starting FlowSession with IssuingAddress
+
+
         //Checking if surveyor approved the property
-        Boolean surveyorApproved = otherPartySession.receive(Boolean.class).unwrap(bl -> bl);
+        Boolean surveyorApproved = inputState.getState().getData().isSurveyorApproved();
 
         //Building Output State
         PropertyState outputState = new PropertyState(linearId, address, surveyorApproved, owner, issuingAuthority, surveyor);
@@ -76,7 +73,7 @@ public class UpdatePropertyFlow extends FlowLogic<Void> {
 
 
         //Getting signers and command
-        List<PublicKey> requiredSigners = Arrays.asList(getOurIdentity().getOwningKey(), surveyor.getOwningKey());
+        List<PublicKey> requiredSigners = Arrays.asList(getOurIdentity().getOwningKey(), issuingAuthority.getOwningKey());
         Command command = new Command<>(new PropertyContract.Commands.Update(), requiredSigners);
 
         //Building Transactions
@@ -90,6 +87,8 @@ public class UpdatePropertyFlow extends FlowLogic<Void> {
 
         //Signing Transactions
         SignedTransaction signedTx = getServiceHub().signInitialTransaction(txBuilder);
+
+        FlowSession otherPartySession = initiateFlow(issuingAuthority);
 
         //Gathering Counterparty Signatures
         SignedTransaction fullySignedTx = subFlow(new CollectSignaturesFlow(

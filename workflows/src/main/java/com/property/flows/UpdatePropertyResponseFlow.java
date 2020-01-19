@@ -22,17 +22,6 @@ public class UpdatePropertyResponseFlow extends FlowLogic<Void> {
     @Override
     public Void call() throws FlowException {
         // Responder flow logic goes here.
-        String address = counterpartySession.receive(String.class).unwrap(st -> {
-
-            return st;
-
-        });
-
-        if (address.contains("Blr")) {
-            counterpartySession.send(true);
-        } else {
-            counterpartySession.send(false);
-        }
 
         class SignTxFlow extends SignTransactionFlow {
             private SignTxFlow(FlowSession otherPartySession) {

@@ -1,6 +1,7 @@
 package com.property.contracts;
 
 import com.property.states.PropertyState;
+import com.property.states.PropertySurveyorState;
 import net.corda.core.contracts.CommandData;
 import net.corda.core.contracts.CommandWithParties;
 import net.corda.core.contracts.Contract;
@@ -27,7 +28,6 @@ public class PropertySurveyorContract implements Contract {
                 throw new IllegalArgumentException("No inputs should be consumed when creating a new property.");
             if (!(tx.getOutputs().size() == 1))
                 throw new IllegalArgumentException("There should be one output state.");
-
         }
 
 
